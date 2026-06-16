@@ -27,16 +27,14 @@ XW = {
  "Non-residential mental / behavioral health":["90791","90792","90832","90833","90834","90836","90837","90838","90846","90847","90853","H0031","H0032","H0034","H0035","H0036","H0037","H0039","H0040","H2010","H2011","H2012","H2013","H2017","H2018","H2019","H2020","H0001","H0004","H0005","H0015","H0018","H0019","H0020","H0047","H0050","H2035","H2036","H2014"],
  "Peer Recovery Services":["H0038","H0025","H0046"],
  "Adult Day Services":["S5100","S5101","S5102","S5105"],
- "Integrated Community Supports":["H2015","H2016"],
- "Housing Stabilization Services":["H0043","H0044"],
+ "Comprehensive Community Support":["H2015","H2016"],
+ "Supported Housing":["H0043","H0044"],
  "Home Health Services":["G0151","G0152","G0153","G0155","G0156","G0157","G0158","G0159","G0160","G0161","G0162","G0299","G0300","T1021","T1022","T1030","T1031","S9122","S9123","S9124","T1502","T1503","99500","99501","99502","99503","99504","99505","99506","99507","99509","99510","99511","99512","99600"],
 }
 TIER={"Personal Care Services / HCBS":1,"ABA / autism therapy":1,"Non-Emergency Medical Transport":1,
  "Non-residential mental / behavioral health":2,"Durable Medical Equipment":2,"Home Health Services":2,
- "Integrated Community Supports":3,"Housing Stabilization Services":3,"Peer Recovery Services":3,"Adult Day Services":3}
-NOTE={"ABA / autism therapy":"CPT codes 97151-58 began 2019; 2018 ~ $0.",
- "Integrated Community Supports":"H2015/H2016 comprehensive community support used as proxy (also a MN-specific program name).",
- "Housing Stabilization Services":"Supported-housing codes H0043/H0044; under-captures atypical-provider agencies."}
+ "Comprehensive Community Support":3,"Supported Housing":3,"Peer Recovery Services":3,"Adult Day Services":3}
+NOTE={"ABA / autism therapy":"Adaptive-behavior CPT codes 97151–97158, introduced Jan 2019."}
 con.execute("CREATE TEMP TABLE xw(hcpcs VARCHAR, category VARCHAR)")
 con.executemany("INSERT INTO xw VALUES (?,?)", [(c,cat) for cat,codes in XW.items() for c in codes])
 
@@ -134,8 +132,7 @@ national = {
       "Window restricted to 2019-2023: the five complete, comparable calendar years. The source also covers 2018 and 2024, but 2024's final months were still in claims runout at extract time, and 2018 predates the Jan-2019 ABA CPT codes (a $0 baseline for that category). Growth = 2019->2023.",
       "Geography = provider ZIP (NPPES) -> county FIPS; %.0f%% of categorized paid maps to a county/state (institutional billers with non-residential ZIPs are unmapped)." % cov,
       "Billing attribution = billing-provider county; point-of-care = servicing-provider county (else billing). The dataset has NO patient address, so point-of-care is the closest patient-proximate lens, still provider-based.",
-      "Switching billing->point-of-care moves %.1f%% of categorized spend to a different county; concentrated in clinician-delivered, agency-billed services." % reattr,
-      "Junk HCPCS code '20' ($20T) excluded by construction. HSS/ICS are partly MN-specific program names mapped to national HCPCS proxies; read Tier 3 nationally with care."]},
+      "Switching billing->point-of-care moves %.1f%% of categorized spend to a different county; concentrated in clinician-delivered, agency-billed services." % reattr]},
   "states":states_meta, "categories":landscape(natlp, natl_shift), "series_state":series_state}
 json.dump(national, open(f"{ROOT}/data/national.json","w"))
 
