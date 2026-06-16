@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>U.S. Medicaid — high-growth service categories</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>U.S. Medicaid — high-growth service categories</h1>
+    <p class="sub">Ten fraud-risk service categories, their growth over time, and where the spending lands — nationally by state, or drill into any state's counties. Pick a category to drive the map; use the year slider to watch it spread.</p>
+    <p class="meta">Source: HHS OpenData <code>medicaid-provider-spending</code> (national) · 2018–2024 · metric: Medicaid paid amount · geography via NPPES provider ZIP</p>
+  </header>
+
+  <h2 class="sec">The landscape — growth 2019→2023 · <span id="geoLabel">United States</span></h2>
+  <p class="meta" style="margin:-6px 0 14px">Bars = paid per year (2018→2024); faded ends = partial-data years. Color = growth intensity.
+    <span class="dot bg-hi"></span>explosive ≥2.5×
+    <span class="dot bg-md" style="margin-left:8px"></span>elevated 1.5–2.5×
+    <span class="dot bg-lo" style="margin-left:8px"></span>stable/declining &lt;1.5×</p>
+  <div id="landscape"></div>
+
+  <h2 class="sec">Temporospatial map</h2>
+  <div class="controls">
+    <div class="grp"><label for="geoSel">Geography</label>
+      <select id="geoSel" style="min-width:170px"></select>
+    </div>
+    <div class="grp"><label>Metric</label>
+      <div class="seg" id="metricSeg">
+        <button data-m="total" class="on">Total $</button>
+        <button data-m="percap">Per resident</button>
+      </div>
+    </div>
+    <div class="grp"><label>Attribute by</label>
+      <div class="seg" id="attrSeg">
+        <button data-a="prov" class="on">Billing provider</button>
+        <button data-a="poc">Point of care</button>
+      </div>
+    </div>
+    <div class="grp">
+      <button id="playBtn" aria-label="Play year animation">▶</button>
+      <label for="yearSlider">Year</label>
+      <input type="range" id="yearSlider" min="2018" max="2024" step="1" value="2023">
+      <span id="yearOut">2023</span>
+      <span class="yr-flag" id="yrFlag"></span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="panel">
+      <h3 id="mapTitle">—</h3>
+      <p class="psub" id="mapSub">Paid amount by billing-provider state</p>
+      <div id="map"></div>
+      <div class="legend"><span id="legMin">$0</span><span class="bar" id="legBar"></span><span id="legMax">—</span></div>
+    </div>
+    <div class="panel">
+      <h3>Trajectory · <span id="trajScope">United States</span></h3>
+      <p class="psub" id="trajSub">—</p>
+      <div class="stat-row">
+        <div class="stat"><div class="k">Growth ’19→’23</div><div class="v" id="stMult">—</div></div>
+        <div class="stat"><div class="k">Per year (CAGR)</div><div class="v" id="stCagr">—</div></div>
+        <div class="stat"><div class="k">2023 paid</div><div class="v" id="stLvl">—</div></div>
+      </div>
+      <div class="chart-box"><canvas id="traj" role="img" aria-label="Paid amount by year for the selected category and geography"></canvas></div>
+      <h3 style="margin-top:16px;font-size:13.5px">Top <span id="topUnitLabel">states</span> · <span id="tcYear">2023</span></h3>
+      <div class="tc" id="topUnits"></div>
+    </div>
+  </div>
+
+  <footer id="foot">
+    <strong>Method & caveats.</strong>
+    <ul id="caveats"></ul>
+    <div style="margin-top:8px">Coverage: <span id="cov">—</span> of categorized paid maps to a county/state. Every HCPCS→category mapping is auditable in <code>mn_service_category_crosswalk.csv</code>. Numbers aggregate real claim rows; none are modeled or fabricated.</div>
+  </footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script src="vendor/d3.v7.min.js"></script>
+<script src="vendor/topojson.min.js"></script>
+<script src="vendor/chart.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
