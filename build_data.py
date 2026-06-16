@@ -9,7 +9,7 @@ Two attributions: prov = billing provider county; poc = servicing provider count
 No fabricated values; every number aggregates real claim rows."""
 import duckdb, pandas as pd, re, json, os
 MED = os.path.expanduser("~/Documents/Medicade")
-ROOT = os.path.expanduser("~/Documents/mn-medicaid-growth")
+ROOT = os.path.expanduser("~/Documents/medicaid-category-growth")
 os.makedirs(f"{ROOT}/data/states", exist_ok=True)
 con = duckdb.connect()
 con.execute(f"ATTACH '{MED}/medicaid-provider-spending.duckdb' AS m (READ_ONLY)")
@@ -34,7 +34,8 @@ XW = {
 TIER={"Personal Care Services / HCBS":1,"ABA / autism therapy":1,"Non-Emergency Medical Transport":1,
  "Non-residential mental / behavioral health":2,"Durable Medical Equipment":2,"Home Health Services":2,
  "Comprehensive Community Support":3,"Supported Housing":3,"Peer Recovery Services":3,"Adult Day Services":3}
-NOTE={"ABA / autism therapy":"Adaptive-behavior CPT codes 97151–97158, introduced Jan 2019."}
+CODES=dict(XW)  # per-category HCPCS code lists for the on-card tooltip
+CODES["Durable Medical Equipment"]=["all E#### and K#### codes (durable medical equipment & supplies)"]
 con.execute("CREATE TEMP TABLE xw(hcpcs VARCHAR, category VARCHAR)")
 con.executemany("INSERT INTO xw VALUES (?,?)", [(c,cat) for cat,codes in XW.items() for c in codes])
 
@@ -116,7 +117,7 @@ def landscape(pivot, shift_lookup):
         row = pivot.loc[cat] if cat in pivot.index else pd.Series({y:0 for y in YEARS})
         sw = {str(y):round(float(row.get(y,0)),2) for y in YEARS}
         b19,b23 = row.get(2019,0), row.get(2023,0)
-        cats.append({"name":cat,"tier":TIER[cat],"note":NOTE.get(cat,""),"statewide":sw,
+        cats.append({"name":cat,"tier":TIER[cat],"codes":CODES.get(cat,[]),"statewide":sw,
           "mult_19_23":round(b23/b19,2) if b19>0 else None,
           "cagr_19_23":round(((b23/b19)**0.25-1)*100,1) if b19>0 else None,
           "level_2023":round(float(b23),1),

@@ -72,7 +72,7 @@ function currentCategories(){
     const node=NATIONAL.series_state[base.name]?.[geo];
     const sw={}; YEARS.forEach(y=> sw[y]= node? (node.prov[y]||0):0 );
     const b19=sw[2019]||0, b23=sw[2023]||0;
-    return {name:base.name,tier:base.tier,note:base.note,statewide:sw,
+    return {name:base.name,tier:base.tier,codes:base.codes,statewide:sw,
       mult_19_23:b19>0?+(b23/b19).toFixed(2):null,
       cagr_19_23:b19>0?+(((b23/b19)**0.25-1)*100).toFixed(1):null,
       level_2023:+(b23).toFixed(1),
@@ -84,7 +84,7 @@ function allObj(){
   const cats=currentCategories(), sw={};
   YEARS.forEach(y=> sw[y]=cats.reduce((s,c)=>s+(c.statewide[y]||0),0));
   const b19=sw[2019]||0,b23=sw[2023]||0;
-  return {name:ALL_NAME,tier:0,note:"",isAll:true,statewide:sw,
+  return {name:ALL_NAME,tier:0,codes:[],isAll:true,statewide:sw,
     mult_19_23:b19>0?+(b23/b19).toFixed(2):null,
     cagr_19_23:b19>0?+(((b23/b19)**0.25-1)*100).toFixed(1):null,
     level_2023:+b23.toFixed(1),
@@ -146,7 +146,8 @@ function buildLandscape(){
       const gc=growthClass(c.mult_19_23), card=document.createElement("div");
       card.className="card"; card.dataset.name=c.name;
       const rm=realMult(c.mult_19_23), rgc=growthClass(rm);
-      const noteI=c.note?`<span class="note-i" title="${c.note}">&#9432;</span>`:"";
+      const codesTxt=Array.isArray(c.codes)?c.codes.join(", "):"";
+      const noteI=codesTxt?`<span class="note-i" title="HCPCS codes — ${codesTxt}">&#9432;</span>`:"";
       card.innerHTML=`<div class="nm">${c.name}${noteI}</div>${sparkline(c)}
         <div class="row"><div><div class="mult g-${gc}">${multTxt(c.mult_19_23)}</div>
           <div class="sm">nominal · <span class="g-${rgc}">real ${multTxt(rm)}</span> vs CPI</div></div>

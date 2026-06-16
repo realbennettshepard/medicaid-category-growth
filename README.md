@@ -11,7 +11,7 @@ No backend, no build step at runtime — just static files. Host it anywhere.
 ## Run locally
 
 ```bash
-cd mn-medicaid-growth
+cd medicaid-category-growth
 python3 -m http.server 8077
 # open http://localhost:8077
 ```
@@ -68,9 +68,9 @@ build_data.py               regenerates all data from the source DuckDB
 - **Coverage:** ~**82%** of categorized national paid maps to a county/state (some
   institutional billers use non-residential ZIPs absent from the ZIP→county crosswalk).
   Surfaced in the footer.
-- **Category crosswalk:** every HCPCS→category assignment is auditable in
-  `../Medicade/mn_service_category_crosswalk.csv`. Categories are non-overlapping; DME =
-  any `E#`/`K#` HCPCS code.
+- **Category crosswalk:** every HCPCS→category assignment is defined by national HCPCS/CPT
+  code sets and auditable in `build_data.py` (the `XW` map). Categories are non-overlapping;
+  DME = any `E#`/`K#` HCPCS code. Each category's codes are listed in its on-card ⓘ tooltip.
 
 ### Honesty notes (also in the app footer)
 
@@ -79,11 +79,10 @@ build_data.py               regenerates all data from the source DuckDB
   excluded because it predates the Jan-2019 ABA CPT codes (a $0 baseline for that category).
   **2024 is excluded** because its final month (Dec 2024) was still in claims runout at
   extract time (~⅓ of a normal month). Growth = **2019→2023**.
-- Junk HCPCS code `"20"` ($20T) is excluded by construction.
-- **ABA** CPT codes (97151–97158) began 2019, so 2018 ≈ $0.
-- **Integrated Community Supports** and **Housing Stabilization Services** are partly
-  MN-specific program *names*; nationally they map to broad HCPCS proxies (H2015/H2016,
-  H0043/H0044), so read Tier 3 national figures with that caveat.
+- Categories are groupings of national HCPCS/CPT codes, not official Medicaid benefit
+  taxonomies. **Comprehensive Community Support** (H2015/H2016) and **Supported Housing**
+  (H0043/H0044) are billed unevenly across states, so their national totals lean toward the
+  states that use those codes.
 - Counties/states are **provider** location, not patient residence. "Per resident" divides
   by the unit's population — a screening flag, not a true per-capita rate.
 
