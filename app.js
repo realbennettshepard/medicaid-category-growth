@@ -1,6 +1,6 @@
 "use strict";
-const YEARS=[2018,2019,2020,2021,2022,2023,2024];
-const PARTIAL={2018:"2018 partial",2024:"Dec ’24 runout"};
+const YEARS=[2019,2020,2021,2022,2023];
+const PARTIAL={};  // all five years are complete; no partial-data flags needed
 const fmtM=v=>v>=1000?"$"+(v/1000).toFixed(1)+"B":"$"+(v<10?v.toFixed(1):Math.round(v))+"M";
 const fmtPer=v=>"$"+(v>=100?Math.round(v):v.toFixed(1));
 const growthClass=m=>m==null?"g-lo":(m>=2.5?"hi":(m>=1.5?"md":"lo"));
@@ -113,8 +113,8 @@ function sparkline(cat){
   const v=YEARS.map(y=>cat.statewide[y]||0), max=Math.max(...v,1e-6);
   const W=160,H=34,n=v.length,gap=4,bw=(W-gap*(n-1))/n, cls="bar-"+growthClass(cat.mult_19_23);
   let bars="";
-  v.forEach((val,i)=>{ const h=Math.max(2,val/max*(H-3)),x=i*(bw+gap),y=H-h,op=(i===0||i===n-1)?.35:1;
-    bars+=`<rect class="${cls}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="1.5" opacity="${op}"/>`; });
+  v.forEach((val,i)=>{ const h=Math.max(2,val/max*(H-3)),x=i*(bw+gap),y=H-h;
+    bars+=`<rect class="${cls}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="1.5"/>`; });
   return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${bars}</svg>`;
 }
 function buildLandscape(){
@@ -257,7 +257,7 @@ function wireControls(){
   document.getElementById("playBtn").addEventListener("click",togglePlay);
 }
 function togglePlay(){ playing?stopPlay():startPlay(); }
-function startPlay(){ document.getElementById("playBtn").textContent="❚❚"; if(year>=2024) setYear(2018);
-  playing=setInterval(()=>{ if(year>=2024){stopPlay();return;} setYear(year+1); },900); }
+function startPlay(){ document.getElementById("playBtn").textContent="❚❚"; if(year>=2023) setYear(2019);
+  playing=setInterval(()=>{ if(year>=2023){stopPlay();return;} setYear(year+1); },900); }
 function stopPlay(){ if(playing){clearInterval(playing);playing=null;} document.getElementById("playBtn").textContent="▶"; }
 wireControls();

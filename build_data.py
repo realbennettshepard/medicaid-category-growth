@@ -51,11 +51,11 @@ con.execute("""CREATE TEMP TABLE claims AS
   LEFT JOIN xw ON d.HCPCS_CODE=xw.hcpcs
   LEFT JOIN npi_fips b ON TRY_CAST(d.BILLING_PROVIDER_NPI_NUM   AS BIGINT)=b.npi
   LEFT JOIN npi_fips s ON TRY_CAST(d.SERVICING_PROVIDER_NPI_NUM AS BIGINT)=s.npi
-  WHERE d.CLAIM_FROM_MONTH BETWEEN '2018-01' AND '2024-12'
+  WHERE d.CLAIM_FROM_MONTH BETWEEN '2019-01' AND '2023-12'
     AND (xw.category IS NOT NULL OR regexp_matches(d.HCPCS_CODE,'^(E[0-9]|K[0-9])'))""")
 print("categorized rows:", con.execute("SELECT COUNT(*) FROM claims").fetchone()[0])
 
-YEARS=list(range(2018,2025))
+YEARS=list(range(2019,2024))  # 2019-2023: five complete, comparable calendar years
 cov = con.execute("SELECT ROUND(100.0*SUM(CASE WHEN prov_fips IS NOT NULL THEN paid ELSE 0 END)/SUM(paid),1) FROM claims").fetchone()[0]
 reattr = con.execute("SELECT ROUND(100.0*SUM(CASE WHEN poc_fips IS DISTINCT FROM prov_fips THEN paid ELSE 0 END)/SUM(paid),1) FROM claims").fetchone()[0]
 
@@ -128,10 +128,10 @@ def landscape(pivot, shift_lookup):
 states_meta = {st: {"name":state_names.get(st, st), "pop":st_pop.get(st,0)} for st in sorted(set(st_prov.st))}
 national = {
   "meta":{"level":"national","source":"HHS OpenData medicaid-provider-spending (national)",
-    "metric":"Medicaid paid amount ($M), summed TOTAL_PAID","window":"2018-2024 monthly",
+    "metric":"Medicaid paid amount ($M), summed TOTAL_PAID","window":"2019-2023 (five complete calendar years)",
     "years":YEARS,"county_coverage_pct":cov,"poc_reattr_pct":reattr,
     "caveats":[
-      "2018 under-reported (ramp-up); 2019 is first clean full year. Dec 2024 has claims runout. Headline growth uses 2019->2023.",
+      "Window restricted to 2019-2023: the five complete, comparable calendar years. The source also covers 2018 and 2024, but 2024's final months were still in claims runout at extract time, and 2018 predates the Jan-2019 ABA CPT codes (a $0 baseline for that category). Growth = 2019->2023.",
       "Geography = provider ZIP (NPPES) -> county FIPS; %.0f%% of categorized paid maps to a county/state (institutional billers with non-residential ZIPs are unmapped)." % cov,
       "Billing attribution = billing-provider county; point-of-care = servicing-provider county (else billing). The dataset has NO patient address, so point-of-care is the closest patient-proximate lens, still provider-based.",
       "Switching billing->point-of-care moves %.1f%% of categorized spend to a different county; concentrated in clinician-delivered, agency-billed services." % reattr,

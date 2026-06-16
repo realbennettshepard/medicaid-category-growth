@@ -1,7 +1,7 @@
 # U.S. Medicaid — high-growth service categories
 
 A standalone, static web tool that maps 10 fraud-risk Medicaid service categories across
-the United States: their **growth over time** (2018–2024) and their **temporospatial**
+the United States: their **growth over time** (2019–2023) and their **temporospatial**
 spread — nationally **by state**, or drill into **any state's counties**. Pick a category
 to drive the choropleth; scrub or play the year slider to watch spending spread; toggle
 total vs. per-resident and billing vs. point-of-care attribution.
@@ -29,7 +29,7 @@ county maps) are bundled — **no CDN/network dependencies** at runtime.
 - **Default view:** US states choropleth for the selected category. Top list = top states.
 - **Drill down:** pick a state from the Geography dropdown → it lazy-loads that state's
   county file and switches to a county choropleth. Top list = top counties.
-- **Year slider + ▶ play:** animate 2018→2024. Color domain is fixed per category, so the
+- **Year slider + ▶ play:** animate 2019→2023. Color domain is fixed per category, so the
   animation shows real growth (places "light up" over time).
 - **Metric:** Total $ or Per resident (divides by state/county population).
 - **Attribute by:** Billing provider (where the agency bills) or Point of care (servicing
@@ -50,8 +50,9 @@ build_data.py               regenerates all data from the source DuckDB
 
 ## Data provenance
 
-- **Source:** HHS OpenData `medicaid-provider-spending` (national, 2018-01 → 2024-12,
-  monthly). 14.9M categorized claim rows.
+- **Source:** HHS OpenData `medicaid-provider-spending` (national, monthly). Restricted to
+  **2019–2023**, the five complete calendar years (~11M categorized claim rows). The source
+  also has 2018 and 2024; see the window note below for why they're excluded.
 - **Metric:** summed `TOTAL_PAID` (Medicaid paid amount), in $M.
 - **Geography (two attributions):**
   - *Billing provider* — billing NPI primary ZIP (NPPES) → county FIPS (state = FIPS[:2]).
@@ -69,8 +70,11 @@ build_data.py               regenerates all data from the source DuckDB
 
 ### Honesty notes (also in the app footer)
 
-- **2018 is under-reported** (ramp-up); 2019 is the first clean full year. Headline growth
-  uses **2019→2023**. **Dec 2024 has claims runout** — late-2024 dips are partly artifact.
+- **Window = 2019–2023** (five complete calendar years). 2018 *is* complete nationally
+  (12 steady months, all 51 states), so it's not excluded for being "partial" — it's
+  excluded because it predates the Jan-2019 ABA CPT codes (a $0 baseline for that category).
+  **2024 is excluded** because its final month (Dec 2024) was still in claims runout at
+  extract time (~⅓ of a normal month). Growth = **2019→2023**.
 - Junk HCPCS code `"20"` ($20T) is excluded by construction.
 - **ABA** CPT codes (97151–97158) began 2019, so 2018 ≈ $0.
 - **Integrated Community Supports** and **Housing Stabilization Services** are partly
