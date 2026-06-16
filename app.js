@@ -5,6 +5,11 @@ const fmtM=v=>v>=1000?"$"+(v/1000).toFixed(1)+"B":"$"+(v<10?v.toFixed(1):Math.ro
 const fmtPer=v=>"$"+(v>=100?Math.round(v):v.toFixed(1));
 const growthClass=m=>m==null?"g-lo":(m>=2.5?"hi":(m>=1.5?"md":"lo"));
 const ALL_NAME="All 10 categories";
+// CPI-U, US city avg, annual average, 1982-84=100 — BLS (via usinflationcalculator.com). Verified.
+const CPI={2019:255.657,2020:258.811,2021:270.970,2022:292.655,2023:304.702};
+const INFL_MULT=CPI[2023]/CPI[2019];                 // 1.192 → +19.2% over 2019-2023
+const realMult=m=>m==null?null:+(m/INFL_MULT).toFixed(2);
+const multTxt=m=>m==null?"—":(m>=10?Math.round(m):m.toFixed(1))+"×";
 
 let NATIONAL, US_FEATURES, COUNTY_FEATURES, sel=null, metric="total", attr="prov", year=2023, playing=null, trajChart=null;
 let geo="US", STATEDATA=null; const stateCache={};
@@ -122,14 +127,14 @@ function buildLandscape(){
   const cats=currentCategories(), host=document.getElementById("landscape"); host.innerHTML="";
   // "All categories" summary card (combined total)
   const all=allObj(), agc=growthClass(all.mult_19_23);
-  const aMult=all.mult_19_23==null?"—":(all.mult_19_23>=10?Math.round(all.mult_19_23):all.mult_19_23.toFixed(1))+"×";
-  const aCagr=all.cagr_19_23==null?"":(all.cagr_19_23>=0?"+":"")+all.cagr_19_23+"%/yr";
+  const arm=realMult(all.mult_19_23), argc=growthClass(arm);
   const allCard=document.createElement("div");
   allCard.className="card card-all"; allCard.dataset.name=ALL_NAME;
   allCard.innerHTML=`<div class="all-left"><div class="nm">All 10 categories — combined</div>
       <div class="sm" style="margin-top:2px">click to map the total · click any card below to isolate one</div></div>
     <div class="all-spark">${sparkline(all)}</div>
-    <div class="all-stat"><div class="mult g-${agc}">${aMult}</div><div class="sm">’19→’23 · ${aCagr}</div></div>
+    <div class="all-stat"><div class="mult g-${agc}">${multTxt(all.mult_19_23)}</div><div class="sm">nominal ’19→’23</div></div>
+    <div class="all-stat"><div class="mult g-${argc}">${multTxt(arm)}</div><div class="sm">real vs CPI</div></div>
     <div class="all-stat"><div class="lvl">${fmtM(all.statewide[2023]||0)}</div><div class="sm">2023 total</div></div>`;
   allCard.onclick=()=>select(ALL_NAME);
   host.appendChild(allCard);
@@ -140,11 +145,11 @@ function buildLandscape(){
     cats.filter(c=>c.tier===t).forEach(c=>{
       const gc=growthClass(c.mult_19_23), card=document.createElement("div");
       card.className="card"; card.dataset.name=c.name;
-      const multTxt=c.mult_19_23==null?"—":(c.mult_19_23>=10?Math.round(c.mult_19_23):c.mult_19_23.toFixed(1))+"×";
-      const cagrTxt=c.cagr_19_23==null?"":(c.cagr_19_23>=0?"+":"")+c.cagr_19_23+"%/yr";
+      const rm=realMult(c.mult_19_23), rgc=growthClass(rm);
       const noteI=c.note?`<span class="note-i" title="${c.note}">&#9432;</span>`:"";
       card.innerHTML=`<div class="nm">${c.name}${noteI}</div>${sparkline(c)}
-        <div class="row"><div><div class="mult g-${gc}">${multTxt}</div><div class="sm">’19→’23 · ${cagrTxt}</div></div>
+        <div class="row"><div><div class="mult g-${gc}">${multTxt(c.mult_19_23)}</div>
+          <div class="sm">nominal · <span class="g-${rgc}">real ${multTxt(rm)}</span> vs CPI</div></div>
         <div><div class="lvl">${fmtM(c.statewide[2023]||0)}</div><div class="sm">2023</div></div></div>`;
       card.onclick=()=>select(c.name);
       grid.appendChild(card);
@@ -202,16 +207,20 @@ function updateMapSub(){
 /* ---------- right panel ---------- */
 function paintTraj(){
   const v=YEARS.map(y=>sel.statewide[y]||0);
+  const base=v[0]||0, infl=YEARS.map(y=>base*CPI[y]/CPI[2019]);  // 2019 level grown at CPI-U
   if(trajChart) trajChart.destroy();
   trajChart=new Chart(document.getElementById("traj"),{type:"line",
-    data:{labels:YEARS,datasets:[{data:v,borderColor:"#185fa5",backgroundColor:"rgba(24,95,165,.10)",fill:true,tension:.25,
-      pointRadius:YEARS.map(y=>y===year?6:3.5),
-      pointBackgroundColor:YEARS.map(y=>y===year?"#a32d2d":(PARTIAL[y]?"#c9c6bd":"#185fa5")),
-      pointBorderColor:"#fff",pointBorderWidth:1.5,borderWidth:2}]},
+    data:{labels:YEARS,datasets:[
+      {label:"Actual",data:v,borderColor:"#185fa5",backgroundColor:"rgba(24,95,165,.10)",fill:true,tension:.25,
+        pointRadius:YEARS.map(y=>y===year?6:3.5),
+        pointBackgroundColor:YEARS.map(y=>y===year?"#a32d2d":"#185fa5"),
+        pointBorderColor:"#fff",pointBorderWidth:1.5,borderWidth:2,order:1},
+      {label:"If it only kept pace with inflation",data:infl,borderColor:"#888780",borderDash:[5,4],
+        borderWidth:1.5,fill:false,pointRadius:0,tension:.25,order:2}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:c=>fmtM(c.parsed.y)+(PARTIAL[c.label]?"  ("+PARTIAL[c.label]+")":"")}}},
+      tooltip:{callbacks:{label:c=>c.dataset.label+": "+fmtM(c.parsed.y)}}},
       scales:{y:{ticks:{callback:v=>fmtM(v),font:{size:11}},grid:{color:"#eee"}},x:{ticks:{font:{size:11}},grid:{display:false}}}}});
-  document.getElementById("trajSub").textContent=NATIONAL.meta.metric;
+  document.getElementById("trajSub").textContent="Nominal $; dashed = 2019 spend grown at CPI-U (+19.2%, 2019→23)";
 }
 function paintTopUnits(){
   const rows=currentUnitIds().map(u=>({u,nm:unitName(u),v:unitValue(sel.name,u,year)}))
@@ -232,8 +241,9 @@ function select(name){
   document.querySelectorAll(".card").forEach(el=>el.classList.toggle("active",el.dataset.name===sel.name));
   document.getElementById("mapTitle").textContent=sel.name;
   const gc=growthClass(sel.mult_19_23);
-  document.getElementById("stMult").innerHTML=`<span class="g-${gc}">${sel.mult_19_23==null?"—":(sel.mult_19_23>=10?Math.round(sel.mult_19_23):sel.mult_19_23.toFixed(1))+"×"}</span>`;
-  document.getElementById("stCagr").textContent=sel.cagr_19_23==null?"—":(sel.cagr_19_23>=0?"+":"")+sel.cagr_19_23+"%";
+  document.getElementById("stMult").innerHTML=`<span class="g-${gc}">${multTxt(sel.mult_19_23)}</span>`;
+  const rm=realMult(sel.mult_19_23), rgc=growthClass(rm);
+  document.getElementById("stCagr").innerHTML=`<span class="g-${rgc}">${multTxt(rm)}</span>`;
   document.getElementById("stLvl").textContent=fmtM(sel.statewide[2023]||0);
   updateMapSub(); paintMap(); paintTraj(); paintTopUnits();
 }

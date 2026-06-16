@@ -15,7 +15,7 @@
   </header>
 
   <h2 class="sec">The landscape — growth 2019→2023 · <span id="geoLabel">United States</span></h2>
-  <p class="meta" style="margin:-6px 0 14px">Bars = paid per year (2019→2023). Color = growth intensity.
+  <p class="meta" style="margin:-6px 0 14px">Bars = paid per year (2019→2023). Color = growth intensity. Real × = inflation-adjusted (nominal ÷ CPI-U, which rose +19.2% over 2019→23).
     <span class="dot bg-hi"></span>explosive ≥2.5×
     <span class="dot bg-md" style="margin-left:8px"></span>elevated 1.5–2.5×
     <span class="dot bg-lo" style="margin-left:8px"></span>stable/declining &lt;1.5×</p>
@@ -58,11 +58,15 @@
       <h3>Trajectory · <span id="trajScope">United States</span></h3>
       <p class="psub" id="trajSub">—</p>
       <div class="stat-row">
-        <div class="stat"><div class="k">Growth ’19→’23</div><div class="v" id="stMult">—</div></div>
-        <div class="stat"><div class="k">Per year (CAGR)</div><div class="v" id="stCagr">—</div></div>
+        <div class="stat"><div class="k">Nominal ’19→’23</div><div class="v" id="stMult">—</div></div>
+        <div class="stat"><div class="k">Real vs inflation</div><div class="v" id="stCagr">—</div></div>
         <div class="stat"><div class="k">2023 paid</div><div class="v" id="stLvl">—</div></div>
       </div>
-      <div class="chart-box"><canvas id="traj" role="img" aria-label="Paid amount by year for the selected category and geography"></canvas></div>
+      <div class="leg2">
+        <span><span class="ln ln-actual"></span>Actual</span>
+        <span><span class="ln ln-infl"></span>If it only kept pace with inflation (CPI-U)</span>
+      </div>
+      <div class="chart-box"><canvas id="traj" role="img" aria-label="Paid amount by year for the selected category, with a dashed reference line showing 2019 spending grown at the rate of inflation"></canvas></div>
       <h3 style="margin-top:16px;font-size:13.5px">Top <span id="topUnitLabel">states</span> · <span id="tcYear">2023</span></h3>
       <div class="tc" id="topUnits"></div>
     </div>

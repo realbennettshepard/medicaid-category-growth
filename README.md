@@ -34,6 +34,10 @@ county maps) are bundled — **no CDN/network dependencies** at runtime.
 - **Metric:** Total $ or Per resident (divides by state/county population).
 - **Attribute by:** Billing provider (where the agency bills) or Point of care (servicing
   provider — closest patient-proximate lens the data allows).
+- **Inflation-adjusted growth:** every card and the trajectory panel show *real* growth
+  (nominal ÷ CPI-U) next to nominal, and the chart overlays a dashed "if it only kept pace
+  with inflation" line. CPI-U rose **+19.2%** over 2019→2023, so a nominal 1.2× is ~1.0×
+  real (no real growth). CPI-U annual averages from BLS (255.657 in 2019 → 304.702 in 2023).
 
 ## Files
 
