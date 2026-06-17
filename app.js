@@ -11,7 +11,7 @@ const INFL_MULT=CPI[2023]/CPI[2019];                 // 1.192 → +19.2% over 20
 const realMult=m=>m==null?null:+(m/INFL_MULT).toFixed(2);
 const multTxt=m=>m==null?"—":(m>=10?Math.round(m):m.toFixed(1))+"×";
 
-let NATIONAL, US_FEATURES, COUNTY_FEATURES, sel=null, metric="total", attr="prov", year=2023, playing=null, trajChart=null;
+let NATIONAL, US_FEATURES, COUNTY_FEATURES, sel=null, metric="percap", attr="prov", year=2023, playing=null, trajChart=null;
 let geo="US", STATEDATA=null; const stateCache={};
 let path=null;
 
