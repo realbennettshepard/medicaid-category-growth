@@ -159,7 +159,7 @@ function buildLandscape(){
 }
 function buildCaveats(){
   const extra=["Counties/states are <em>provider</em> location, not patient residence — providers may serve patients across lines.",
-    "“Per resident” divides by the unit's population; a low-population unit served by a regional provider can show an inflated rate — read it as a screening flag."];
+    "“Per resident” divides by the unit's population; a low-population unit served by a regional provider can show an inflated rate."];
   document.getElementById("caveats").innerHTML=NATIONAL.meta.caveats.concat(extra).map(c=>`<li>${c}</li>`).join("");
 }
 
