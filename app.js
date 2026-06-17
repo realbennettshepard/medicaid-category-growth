@@ -26,7 +26,6 @@ Promise.all([
   COUNTY_FEATURES=topojson.feature(ctopo, ctopo.objects.counties).features;
   buildGeoSelector();
   buildCaveats();
-  document.getElementById("cov").textContent=NATIONAL.meta.county_coverage_pct+"%";
   setGeo("US", true);
 });
 
